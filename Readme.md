@@ -16,6 +16,7 @@ Same data is used for unit testing of [fl-darkstat](https://github.com/darklab8/
 
 - Your repository should be containing minimal file amount needed for fl-stat
 - And it could use CI workflow for autodeployment similar to [shown example](./.github/workflows/publish.yaml).
+    - You are provided with [Github Action](https://github.com/darklab8/fl-darkstat/blob/master/.github/actions/build/action.yml) for building. You can customize workflow to what u wish.
 - Instead of deploying to github pages, you can deploy to any other target capable to server static assets (html/css/js)
 - Alternatively fl-darkstat is usable locally, see its repository for more information
 
