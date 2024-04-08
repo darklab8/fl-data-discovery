@@ -4,17 +4,19 @@ on:
   push: {}
 
 jobs:
-    github-pages:
-        name: Github Pages
-        runs-on: ubuntu-22.04
-        permissions:
-          contents: read
-          pages: write
-          id-token: write
-        environment:
-          name: github-pages
-          url: ${{ steps.deployment.outputs.page_url }}
-        steps:
+  github-pages:
+    name: Github Pages
+    runs-on: ubuntu-22.04
+    permissions:
+        contents: read
+        pages: write
+        id-token: write
+    environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+        - name: Check out source repository
+          uses: actions/checkout@v2
 
         - uses: darklab8/fl-darkstat/.github/actions/build@master
           with:
