@@ -1,0 +1,59 @@
+# binary data
+*.wav
+*.db
+*.3db
+*.3DB
+*.cmp
+*.dfm
+*.ale
+*.thn
+*.sur
+*.exe
+*.anm
+*.txm
+*.bmp
+*.tga
+*.mat
+*.MAT
+*.mat~tmp1
+*.pte
+*.sph
+*.016
+*.256
+*.utf
+*.vms
+*.CMP
+
+# text friendly, but not needed
+*.hta
+*.htm
+*.page
+*.window_layout
+*.window_settings
+IONCROSS/
+DLLS/
+DATA/AUDIO/
+DATA/BASES/
+DATA/CHARACTERS/
+DATA/COCKPITS/
+DATA/FONTS/
+DATA/FX/
+DATA/INTERFACE/
+DATA/RANDOMMISSIONS/
+DATA/SCREENS/
+DATA/SCRIPTS/
+DATA/SOLAR/
+*.cfg
+*.fl
+*.URL
+*.xml
+*.log
+/*.dll
+EXE/1033/
+EXE/flhook_plugins/
+
+# lets leave commited
+# *.dll
+# *.ini
+# *.txt
+

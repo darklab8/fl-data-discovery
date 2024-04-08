@@ -1,0 +1,10 @@
+name: Publish
+
+on:
+  push: {}
+
+jobs:
+  publish:
+    uses: darklab8/fl-darkstat/.github/workflows/publish-to-pages.yml@master
+    with:
+      site-root: "/fl-data/"
