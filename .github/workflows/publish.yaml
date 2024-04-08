@@ -4,9 +4,31 @@ on:
   push: {}
 
 jobs:
-  publish:
-    uses: darklab8/fl-darkstat/.github/workflows/publish-to-pages.yml@master
-    with:
-      site-root: "/fl-data-discovery/"
-      freelancer-folder: ${{ github.workspace }}
-      heading: staging env for fl-darkstat <a href="https://github.com/darklab8/fl-data">Github</a>
+    github-pages:
+        name: Github Pages
+        runs-on: ubuntu-22.04
+        permissions:
+          contents: read
+          pages: write
+          id-token: write
+        environment:
+          name: github-pages
+          url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+
+        - uses: darklab8/fl-darkstat/.github/actions/build@master
+          with:
+            site-root: "/fl-data-discovery/"
+            freelancer-folder: ${{ github.workspace }}
+            heading: staging env for fl-darkstat <a href="https://github.com/darklab8/fl-data">Github</a>
+
+        - uses: actions/upload-pages-artifact@v1
+          with:
+            name: github-pages
+            path: ./build
+        
+        # Turn on ability to deploy to pages in repository settings, Pages tab
+        # choose "Github Actions" deployment method to Pages
+        - name: Deploy to pages
+          uses: actions/deploy-pages@v1
+          id: deployment
