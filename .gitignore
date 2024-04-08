@@ -119,6 +119,7 @@ zlib.dll
 Zone.dll
 EXE/*.ini
 !EXE/freelancer.ini
+CheatMessage.txt
 
 # lets leave commited
 # *.dll
