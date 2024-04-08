@@ -117,6 +117,8 @@ x86math.dll
 ximage.dll
 zlib.dll
 Zone.dll
+EXE/*.ini
+!EXE/freelancer.ini
 
 # lets leave commited
 # *.dll
