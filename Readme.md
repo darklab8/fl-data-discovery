@@ -22,5 +22,6 @@ Same data is used for unit testing of [fl-darkstat](https://github.com/darklab8/
 
 # Updates
 
-Feel free to ask access to this repository if u wish updating its files for keeping online flstat up to date
-See contacts in [fl-darkstat readme](https://github.com/darklab8/fl-darkstat)
+- Feel free to ask access to this repository if u wish updating this deployment to up to date.
+- See contacts in [fl-darkstat readme](https://github.com/darklab8/fl-darkstat)
+- All is needed to push new files to this repo and it will auto redeploy new version on its own
