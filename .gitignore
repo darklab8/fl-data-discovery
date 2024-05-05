@@ -45,7 +45,7 @@ DATA/SOLAR/
 *.cfg
 *.fl
 *.URL
-*.xml
+# *.xml
 *.log
 /*.dll
 EXE/1033/
