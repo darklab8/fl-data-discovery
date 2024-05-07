@@ -301,6 +301,35 @@ func readLauncherConfig() map[PatchHash]string {
 	return patches
 }
 
+/*
+AdjustFoldersInPatch replaces folder names in path to relevant case sensitive folders
+And creates them if they don't exist
+*/
+func AdjustFoldersInPath(relative_patch_filepath string, freelancer_folder Filesystem) string {
+	patch_chain_folders := strings.Split(relative_patch_filepath, "/")
+	patch_chain_folders = patch_chain_folders[:len(patch_chain_folders)-1] // minus filename
+
+	for i := 1; i <= len(patch_chain_folders); i++ {
+		folders_chain := patch_chain_folders[:i]
+		patch_target_folder := filepath.Join(folders_chain...)
+
+		if folder, found := freelancer_folder.LowerMapFolders[strings.ToLower(patch_target_folder)]; found {
+			relative_patch_filepath = strings.ReplaceAll(relative_patch_filepath, patch_target_folder, folder.GetPath())
+
+			// refreshing
+			patch_chain_folders = strings.Split(relative_patch_filepath, "/")
+			patch_chain_folders = patch_chain_folders[:len(patch_chain_folders)-1] // minus filename
+		} else {
+			err := os.MkdirAll(patch_target_folder, os.ModePerm)
+			if err != nil {
+				panic(fmt.Sprintln("failed creating mkdirall", err))
+			}
+		}
+	}
+
+	return relative_patch_filepath
+}
+
 func main() {
 	discovery_url := "https://patch.discoverygc.com/"
 	discovery_path_url := discovery_url + "patchlist.xml"
@@ -310,12 +339,6 @@ func main() {
 
 	patchhistory := readLauncherConfig()
 
-	// cmd := exec.Command("ls", "./")
-
-	// // The `Output` method executes the command and
-	// // collects the output, returning its value
-	// out, err := cmd.Output()
-
 	for _, patch := range patches {
 
 		if _, found := patchhistory[patch.Hash]; found {
@@ -324,10 +347,6 @@ func main() {
 		}
 
 		downloadPatch(patch)
-
-		if strings.Contains(patch.Filename, "20231223-hotfix.zip") {
-			fmt.Println()
-		}
 
 		Unzip(patch.GetFilepath(), patch.GetFolderPath())
 
@@ -351,30 +370,7 @@ func main() {
 				os.Remove(freelancer_path.GetPath())
 			}
 
-			if strings.Contains(relative_patch_filepath, "universe.ini") {
-				fmt.Println()
-			}
-
-			patch_chain_folders := strings.Split(relative_patch_filepath, "/")
-			patch_chain_folders = patch_chain_folders[:len(patch_chain_folders)-1] // minus filename
-
-			for i := 1; i <= len(patch_chain_folders); i++ {
-				folders_chain := patch_chain_folders[:i]
-				patch_target_folder := filepath.Join(folders_chain...)
-
-				if folder, found := freelancer_folder.LowerMapFolders[strings.ToLower(patch_target_folder)]; found {
-					relative_patch_filepath = strings.ReplaceAll(relative_patch_filepath, patch_target_folder, folder.GetPath())
-
-					// refreshing
-					patch_chain_folders = strings.Split(relative_patch_filepath, "/")
-					patch_chain_folders = patch_chain_folders[:len(patch_chain_folders)-1] // minus filename
-				} else {
-					err := os.MkdirAll(patch_target_folder, os.ModePerm)
-					if err != nil {
-						panic(fmt.Sprintln("failed creating mkdirall", err))
-					}
-				}
-			}
+			relative_patch_filepath = AdjustFoldersInPath(relative_patch_filepath, freelancer_folder)
 
 			WriteToFile(relative_patch_filepath, content)
 
@@ -383,7 +379,6 @@ func main() {
 		os.RemoveAll(patch.GetFolderPath())
 
 		fmt.Println("applied patch", patch)
-		// break
 	}
 
 }
