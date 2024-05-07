@@ -83,6 +83,11 @@ func fileExists(fpath string) bool {
 	return false
 }
 
+/*
+Unzip is copy paste from
+https://stackoverflow.com/questions/20357223/easy-way-to-unzip-file
+https://stackoverflow.com/a/24792688
+*/
 func Unzip(src, dest string) error {
 	r, err := zip.OpenReader(src)
 	if err != nil {
