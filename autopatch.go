@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -221,7 +222,7 @@ func (f File) GetPath() string {
 }
 
 func (f File) GetRelPathTo(root string) string {
-	path := strings.ReplaceAll(f.filepath_, root+"/", "")
+	path := strings.ReplaceAll(f.filepath_, root+PATH_SEPARATOR, "")
 	return path
 }
 
@@ -313,7 +314,7 @@ AdjustFoldersInPatch replaces folder names in path to relevant case sensitive fo
 And creates them if they don't exist
 */
 func AdjustFoldersInPath(relative_patch_filepath string, freelancer_folder Filesystem) string {
-	patch_chain_folders := strings.Split(relative_patch_filepath, "/")
+	patch_chain_folders := strings.Split(relative_patch_filepath, PATH_SEPARATOR)
 	patch_chain_folders = patch_chain_folders[:len(patch_chain_folders)-1] // minus filename
 
 	for i := 1; i <= len(patch_chain_folders); i++ {
@@ -324,7 +325,7 @@ func AdjustFoldersInPath(relative_patch_filepath string, freelancer_folder Files
 			relative_patch_filepath = strings.ReplaceAll(relative_patch_filepath, patch_target_folder, folder.GetPath())
 
 			// refreshing
-			patch_chain_folders = strings.Split(relative_patch_filepath, "/")
+			patch_chain_folders = strings.Split(relative_patch_filepath, PATH_SEPARATOR)
 			patch_chain_folders = patch_chain_folders[:len(patch_chain_folders)-1] // minus filename
 		} else {
 			err := os.MkdirAll(patch_target_folder, os.ModePerm)
@@ -335,6 +336,16 @@ func AdjustFoldersInPath(relative_patch_filepath string, freelancer_folder Files
 	}
 
 	return relative_patch_filepath
+}
+
+var PATH_SEPARATOR = ""
+
+func init() {
+	if runtime.GOOS == "windows" {
+		PATH_SEPARATOR = "\\"
+	} else {
+		PATH_SEPARATOR = "/"
+	}
 }
 
 func main() {
