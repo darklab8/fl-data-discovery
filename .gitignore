@@ -124,3 +124,6 @@ CheatMessage.txt
 # *.dll
 # *.ini
 # *.txt
+
+dist/
+patches/

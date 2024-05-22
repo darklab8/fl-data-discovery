@@ -2,6 +2,8 @@ package main
 
 import (
 	"archive/zip"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -353,6 +355,19 @@ func main() {
 
 		downloadPatch(patch)
 
+		patch_body, _ := os.ReadFile(patch.GetFilepath())
+		hash := md5.Sum(patch_body)
+		md5_result := hex.EncodeToString(hash[:])
+		fmt.Println("md5_result=", md5_result)
+
+		if md5_result != strings.ToLower(string(patch.Hash)) {
+			panic(fmt.Sprintln("md5 hash sum is not matching", "expected=", patch.Hash, " but bound=", md5_result))
+		}
+
+		// md5, err := checksum.MD5sum(patch.GetFilepath())
+		// fmt.Println(md5)
+		// fmt.Println("md5_result=", md5, err)
+
 		Unzip(patch.GetFilepath(), patch.GetFolderPath())
 
 		freelancer_folder := ScanCaseInsensitiveFS(".")
@@ -385,5 +400,4 @@ func main() {
 
 		fmt.Println("applied patch", patch)
 	}
-
 }
