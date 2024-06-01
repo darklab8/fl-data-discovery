@@ -1,0 +1,56 @@
+name: Publish
+
+on:
+  push:
+    branches:
+    - master
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 10,15,20 * * *'
+
+jobs:
+  github-pages:
+    name: Github Pages
+    runs-on: ubuntu-22.04
+    permissions:
+        contents: read
+        pages: write
+        id-token: write
+    environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+        - name: Check out source repository
+          uses: actions/checkout@v2
+
+        - uses: darklab8/fl-configs/.github/actions/checkout-freelancer@master
+          with:
+            freelancer-mod: "discovery"
+            freelancer-folder: ${{ github.workspace }}/freelancer_folder
+            ssh-key-base64-discovery: ${{ secrets.ID_RSA_FILES_FREELANCER_DISCOVERY }}
+
+        - name: Set up Go
+          uses: actions/setup-go@v3
+          with:
+              go-version: 1.21
+
+        - name: Patch to latest
+          run: go run ${{ github.workspace }}/autopatch.go
+          working-directory: ${{ github.workspace }}/freelancer_folder
+
+        - uses: darklab8/fl-darkstat/.github/actions/build@master
+          with:
+            site-root: "/fl-data-discovery/"
+            freelancer-folder: ${{ github.workspace }}/freelancer_folder
+            heading: <a href="https://github.com/darklab8/fl-darkstat">fl-darkstat</a> from <a href="https://darklab8.github.io/blog/pet_projects.html#DiscoveryFreelancercommunity">DarkTools</a> for <a href="https://github.com/darklab8/fl-data-discovery">Freelancer Discovery</a>
+
+        - uses: actions/upload-pages-artifact@v1
+          with:
+            name: github-pages
+            path: ./build
+        
+        # Turn on ability to deploy to pages in repository settings, Pages tab
+        # choose "Github Actions" deployment method to Pages
+        - name: Deploy to pages
+          uses: actions/deploy-pages@v1
+          id: deployment
