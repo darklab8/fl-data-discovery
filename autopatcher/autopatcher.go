@@ -414,6 +414,8 @@ func RunAutopatcher() {
 
 		fmt.Println("applied patch", patch)
 		patch_marshaled, _ := json.Marshal(patch)
-		os.WriteFile("autopatcher.latest_patch.json", patch_marshaled, 0666)
+		os.WriteFile(AutopatherFilename, patch_marshaled, 0666)
 	}
 }
+
+const AutopatherFilename = "autopatcher.latest_patch.json"
