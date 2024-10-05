@@ -38,6 +38,11 @@ jobs:
           run: go run ${{ github.workspace }}/autopatch.go
           working-directory: ${{ github.workspace }}/freelancer_folder
 
+        - uses: actions/upload-artifact@v4
+          with:
+            name: my-artifact
+            path: freelancer_folder/DATA/SHIPS/rtc_shiparch.ini
+
         - uses: darklab8/fl-darkstat/.github/actions/build@master
           with:
             site-root: "/fl-data-discovery/"
