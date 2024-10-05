@@ -41,7 +41,7 @@ jobs:
         - uses: actions/upload-artifact@v4
           with:
             name: my-artifact
-            path: freelancer_folder/DATA/SHIPS/rtc_shiparch.ini
+            path: freelancer_folder/DATA/SHIPS
 
         - uses: darklab8/fl-darkstat/.github/actions/build@master
           with:
