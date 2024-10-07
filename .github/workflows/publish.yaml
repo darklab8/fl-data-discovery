@@ -47,7 +47,7 @@ jobs:
 
             replaced = data.replace("rep = 0.-55, gd_im_grp", "rep = -0.55, gd_im_grp")
 
-            with open(filename, "rw") as file:
+            with open(filename, "w") as file:
               file.write(replaced)
         - uses: darklab8/fl-darkstat/.github/actions/build@master
           with:
