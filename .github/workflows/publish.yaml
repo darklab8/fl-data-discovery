@@ -42,13 +42,15 @@ jobs:
           shell: python
           run:
             filename = "${{ github.workspace }}/freelancer_folder/DATA/initialworld.ini"
-            with open(filename, "r") as file:
-              data = file.read()
+            read_file = open(filename, "r") as file
+            data = read_file.read()
+            read_file.close()
 
             replaced = data.replace("rep = 0.-55, gd_im_grp", "rep = -0.55, gd_im_grp")
 
-            with open(filename, "rw") as file:
-              file.write(replaced)
+            write_file = open(filename, "rw") as file
+            write_file.write(replaced)
+            write_file.close()
         - uses: darklab8/fl-darkstat/.github/actions/build@master
           with:
             site-root: "/fl-data-discovery/"
