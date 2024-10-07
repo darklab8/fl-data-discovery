@@ -40,17 +40,15 @@ jobs:
 
         - name: temporal fix to disco bugs
           shell: python
-          run:
+          run: >
             filename = "${{ github.workspace }}/freelancer_folder/DATA/initialworld.ini"
-            read_file = open(filename, "r") as file
-            data = read_file.read()
-            read_file.close()
+            with open(filename, "r") as file:
+              data = file.read()
 
             replaced = data.replace("rep = 0.-55, gd_im_grp", "rep = -0.55, gd_im_grp")
 
-            write_file = open(filename, "rw") as file
-            write_file.write(replaced)
-            write_file.close()
+            with open(filename, "rw") as file:
+              file.write(replaced)
         - uses: darklab8/fl-darkstat/.github/actions/build@master
           with:
             site-root: "/fl-data-discovery/"
