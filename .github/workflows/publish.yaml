@@ -40,7 +40,7 @@ jobs:
 
         - name: temporal fix to disco bugs
           shell: python
-          run: >
+          run: |
             filename = "${{ github.workspace }}/freelancer_folder/DATA/initialworld.ini"
             with open(filename, "r") as file:
               data = file.read()
