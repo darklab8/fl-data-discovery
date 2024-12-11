@@ -296,7 +296,7 @@ type BadassRoot struct {
 
 type PatchHash string
 
-func readLauncherConfig() map[PatchHash]string {
+func readLauncherConfig() (map[PatchHash]string, []string) {
 	body, err := os.ReadFile("launcherconfig.xml")
 	if err != nil {
 		panic(fmt.Sprintln("failed to read launcherconfig", err))
@@ -309,7 +309,10 @@ func readLauncherConfig() map[PatchHash]string {
 	for _, patch := range Page.PatchHistory.Patch {
 		patches[PatchHash(patch)] = ""
 	}
-	return patches
+
+	str := string(body)
+	file_lines := strings.Split(str, "\n")
+	return patches, file_lines
 }
 
 /*
@@ -358,9 +361,15 @@ func RunAutopatcher() {
 
 	patches := parseForPatches(discovery_url, resp.Body)
 
-	patchhistory := readLauncherConfig()
+	patchhistory, file_lines := readLauncherConfig()
+
+	var applied_patches []Patch
 
 	for _, patch := range patches {
+
+		if patch.Hash == "E6F377FC78A4833128EA685C29D47458" {
+			fmt.Println()
+		}
 
 		if _, found := patchhistory[patch.Hash]; found {
 			fmt.Println("patch is already installed", patch)
@@ -415,7 +424,28 @@ func RunAutopatcher() {
 		fmt.Println("applied patch", patch)
 		patch_marshaled, _ := json.Marshal(patch)
 		os.WriteFile(AutopatherFilename, patch_marshaled, 0666)
+
+		applied_patches = append(applied_patches, patch)
 	}
+
+	var patch_file_start []string
+	var patch_file_end []string
+	for line_index, _ := range file_lines {
+		if strings.Contains(file_lines[line_index], "<Patch>") && !strings.Contains(file_lines[line_index+1], "<Patch>") {
+			patch_file_start = file_lines[:line_index+1]
+			patch_file_end = file_lines[line_index+1:]
+		}
+	}
+	if len(patch_file_start) == 0 {
+		panic("not found patch line index, where to insert")
+	}
+	var new_patch_file_lines []string
+	new_patch_file_lines = append(new_patch_file_lines, patch_file_start...)
+	for _, patch := range applied_patches {
+		new_patch_file_lines = append(new_patch_file_lines, fmt.Sprintf("    <Patch>%s</Patch>\r", patch.Hash))
+	}
+	new_patch_file_lines = append(new_patch_file_lines, patch_file_end...)
+	os.WriteFile("launcherconfig.xml", []byte(strings.Join(new_patch_file_lines, "\n")), 0666)
 }
 
 const AutopatherFilename = "autopatcher.latest_patch.json"
