@@ -23,11 +23,14 @@ jobs:
         - name: Check out source repository
           uses: actions/checkout@v2
 
+        - name: Download lock file
+          run: wget https://patch.discoverygc.com/patchlist.xml
+
         - name: Cache Freelancer
           id: cache-freelancer
           uses: actions/cache@v3
           with:
-            key: ${{ runner.os }}-freelancer-discovery
+            key: ${{ runner.os }}-freelancer-discovery-${{ hashFiles('patchlist.xml') }}
             path: ${{ github.workspace }}/freelancer_folder
 
         - uses: darklab8/fl-configs/.github/actions/checkout-freelancer@master
