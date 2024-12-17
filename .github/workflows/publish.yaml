@@ -7,6 +7,8 @@ on:
   workflow_dispatch: {}
   schedule:
     - cron: '0 10,15,20 * * *'
+  repository_dispatch:
+    types: [publish]
 
 jobs:
   github-pages:
