@@ -48,7 +48,7 @@ jobs:
               go-version: 1.22.5
 
         - name: Patch to latest
-          run: go run ${{ github.workspace }}/autopatch.go
+          run: go run ${{ github.workspace }}/autopatch.go -wd ${{ github.workspace }}/freelancer_folder
 
         - name: temporal fix to disco bugs
           shell: python
