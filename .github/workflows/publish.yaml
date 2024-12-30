@@ -35,7 +35,7 @@ jobs:
             key: ${{ runner.os }}-freelancer-discovery-${{ hashFiles('patchlist.xml') }}
             path: ${{ github.workspace }}/freelancer_folder
 
-        - uses: darklab8/fl-configs/.github/actions/checkout-freelancer@master
+        - uses: darklab8/infra/.github/actions/checkout-freelancer@master
           if: ${{ steps.cache-freelancer.outputs.cache-hit != 'true' }}
           with:
             freelancer-mod: "discovery"
@@ -43,9 +43,7 @@ jobs:
             ssh-key-base64-discovery: ${{ secrets.ID_RSA_FILES_FREELANCER_DISCOVERY }}
 
         - name: Set up Go
-          uses: actions/setup-go@v3
-          with:
-              go-version: 1.22.5
+          uses: darklab8/infra/.github/actions/install-go@master
 
         - name: Patch to latest
           run: go run ${{ github.workspace }}/autopatch.go -wd ${{ github.workspace }}/freelancer_folder
