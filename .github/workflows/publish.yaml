@@ -49,7 +49,6 @@ jobs:
 
         - name: Patch to latest
           run: go run ${{ github.workspace }}/autopatch.go
-          working-directory: ${{ github.workspace }}/freelancer_folder
 
         - name: temporal fix to disco bugs
           shell: python
