@@ -1,78 +1,70 @@
 name: Publish
-
-on:
+'on':
   push:
     branches:
     - master
-  workflow_dispatch: {}
   schedule:
-    - cron: '0 10,15,20 * * *'
+  - cron: '0 10,15,20 * * *'
+  workflow_dispatch: {}
   repository_dispatch:
-    types: [publish]
-
+    types:
+    - publish
 jobs:
-  github-pages:
+  job:
     name: Github Pages
     runs-on: ubuntu-22.04
     permissions:
-        contents: read
-        pages: write
-        id-token: write
+      pages: write
+      id-token: write
+      contents: read
     environment:
-        name: github-pages
-        url: ${{ steps.deployment.outputs.page_url }}
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-        - name: Check out source repository
-          uses: actions/checkout@v2
+    - name: Check out source repository
+      uses: actions/checkout@v3
+    - name: Download lock file
+      run: wget https://patch.discoverygc.com/patchlist.xml
+    - name: Cache Freelancer
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-freelancer-discovery-${{ hashFiles('patchlist.xml') }}
+        path: ${{ github.workspace }}/freelancer_folder
+      id: cache-freelancer
+    - name: Checkout Freelancer
+      if: ${{ steps.cache-freelancer.outputs.cache-hit != 'true' }}
+      uses: darklab8/infra/.github/actions/checkout-freelancer@master
+      with:
+        freelancer-mod: discovery
+        freelancer-folder: ${{ github.workspace }}/freelancer_folder
+        ssh-key-base64-discovery: ${{ secrets.ID_RSA_FILES_FREELANCER_DISCOVERY }}
+    - name: Install Go
+      uses: darklab8/infra/.github/actions/install-go@master
+    - name: Patch to latest
+      run: go run autopatch.go -wd ${{ github.workspace }}/freelancer_folder
+    - name: temporal fix to disco bugs
+      shell: python
+      run: |
+        filename = "${{ github.workspace }}/freelancer_folder/DATA/initialworld.ini"
+        with open(filename, "r") as file:
+            data = file.read()
 
-        - name: Download lock file
-          run: wget https://patch.discoverygc.com/patchlist.xml
+        replaced = data.replace("rep = 0.-55, gd_im_grp", "rep = -0.55, gd_im_grp")
 
-        - name: Cache Freelancer
-          id: cache-freelancer
-          uses: actions/cache@v3
-          with:
-            key: ${{ runner.os }}-freelancer-discovery-${{ hashFiles('patchlist.xml') }}
-            path: ${{ github.workspace }}/freelancer_folder
-
-        - uses: darklab8/infra/.github/actions/checkout-freelancer@master
-          if: ${{ steps.cache-freelancer.outputs.cache-hit != 'true' }}
-          with:
-            freelancer-mod: "discovery"
-            freelancer-folder: ${{ github.workspace }}/freelancer_folder
-            ssh-key-base64-discovery: ${{ secrets.ID_RSA_FILES_FREELANCER_DISCOVERY }}
-
-        - name: Set up Go
-          uses: darklab8/infra/.github/actions/install-go@master
-
-        - name: Patch to latest
-          run: go run ${{ github.workspace }}/autopatch.go -wd ${{ github.workspace }}/freelancer_folder
-
-        - name: temporal fix to disco bugs
-          shell: python
-          run: |
-            filename = "${{ github.workspace }}/freelancer_folder/DATA/initialworld.ini"
-            with open(filename, "r") as file:
-              data = file.read()
-
-            replaced = data.replace("rep = 0.-55, gd_im_grp", "rep = -0.55, gd_im_grp")
-
-            with open(filename, "w") as file:
-              file.write(replaced)
-        - uses: darklab8/fl-darkstat/.github/actions/build@master
-          with:
-            site-root: "/fl-data-discovery/"
-            freelancer-folder: ${{ github.workspace }}/freelancer_folder
-            heading: <a href="https://github.com/darklab8/fl-darkstat">Darkstat</a> from <a href="https://darklab8.github.io/blog/pet_projects.html#Freelancercommunity">DarkTools</a> for <a href="https://github.com/darklab8/fl-data-discovery">Freelancer Discovery</a>
-            relay-host: "https://darkrelay.dd84ai.com"
-
-        - uses: actions/upload-pages-artifact@v1
-          with:
-            name: github-pages
-            path: ./build
-        
-        # Turn on ability to deploy to pages in repository settings, Pages tab
-        # choose "Github Actions" deployment method to Pages
-        - name: Deploy to pages
-          uses: actions/deploy-pages@v1
-          id: deployment
+        with open(filename, "w") as file:
+            file.write(replaced)
+    - name: Darkstat Build
+      uses: darklab8/fl-darkstat/.github/actions/build@master
+      with:
+        site-root: /fl-data-discovery/
+        freelancer-folder: ${{ github.workspace }}/freelancer_folder
+        heading: <a href="https://github.com/darklab8/fl-darkstat">Darkstat</a> from <a href="https://darklab8.github.io/blog/pet_projects.html#Freelancercommunity">DarkTools</a> for <a href="https://github.com/darklab8/fl-data-discovery">Freelancer Discovery</a>
+        relay-host: https://darkrelay.dd84ai.com
+    - name: Upload artifacts for deployment to Github Pages
+      uses: actions/upload-pages-artifact@v1
+      with:
+        name: github-pages
+        path: './build'
+    - name: Deploy to pages
+      uses: actions/deploy-pages@v1
+      id: deployment

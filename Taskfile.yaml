@@ -10,3 +10,7 @@ tasks:
       - GOOS=linux GOARCH=arm64 go build -v -o dist/autopatch-linux-arm64 autopatch.go
       - GOOS=windows GOARCH=amd64 go build -v -o dist/autopatch-windows-amd64.exe autopatch.go
       - GOOS=windows GOARCH=arm64 go build -v -o dist/autopatch-windows-arm64.exe autopatch.go
+
+  kcl:build:
+    cmds:
+      - kcl kcls/build.k
