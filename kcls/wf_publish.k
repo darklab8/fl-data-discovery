@@ -63,6 +63,7 @@ with open(filename, "w") as file:
 """
         }
         darkstat.Build(darkstat.BuildArgs{
+            site_host = "https://darkstat.dd84ai.com"
             site_root = "/fl-data-discovery/"
             freelancer_folder = _freelancer_folder
             heading = '<a href="https://github.com/darklab8/fl-darkstat">Darkstat</a> from <a href="https://darklab8.github.io/blog/pet_projects.html#Freelancercommunity">DarkTools</a> for <a href="https://github.com/darklab8/fl-data-discovery">Freelancer Discovery</a>'

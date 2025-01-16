@@ -22,7 +22,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
     - name: Check out source repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Download lock file
       run: wget https://patch.discoverygc.com/patchlist.xml
     - name: Cache Freelancer
@@ -56,6 +56,7 @@ jobs:
     - name: Darkstat Build
       uses: darklab8/fl-darkstat/.github/actions/build@master
       with:
+        site-host: https://darkstat.dd84ai.com
         site-root: /fl-data-discovery/
         freelancer-folder: ${{ github.workspace }}/freelancer_folder
         heading: <a href="https://github.com/darklab8/fl-darkstat">Darkstat</a> from <a href="https://darklab8.github.io/blog/pet_projects.html#Freelancercommunity">DarkTools</a> for <a href="https://github.com/darklab8/fl-data-discovery">Freelancer Discovery</a>
