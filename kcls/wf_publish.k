@@ -68,6 +68,7 @@ with open(filename, "w") as file:
             freelancer_folder = _freelancer_folder
             heading = '<a href="https://github.com/darklab8/fl-darkstat">Darkstat</a> from <a href="https://darklab8.github.io/blog/pet_projects.html#Freelancercommunity">DarkTools</a> for <a href="https://github.com/darklab8/fl-data-discovery">Freelancer Discovery</a>'
             relay_host = "https://darkrelay.dd84ai.com"
+            apigateway_host = "https://apigateway.dd84ai.com"
         })
     ]  + ghc.PagesToDeploySteps(ghc.PagesDeployOpts {})
 }
