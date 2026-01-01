@@ -14,8 +14,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"github.com/rs/zerolog/log"
 )
 
 type RequestResp struct {
@@ -45,7 +43,8 @@ func Request(url string) RequestResp {
 		defer res.Body.Close()
 		bodyBytes, err := io.ReadAll(res.Body)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Println("err=", err.Error())
+			os.Exit(1)
 		}
 		bodyString := string(bodyBytes)
 		fmt.Println("body=", bodyString)
