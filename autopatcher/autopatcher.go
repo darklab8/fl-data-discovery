@@ -37,6 +37,11 @@ func Request(url string) RequestResp {
 	fmt.Println("client: got response!")
 	fmt.Println("client: status code: ", res.StatusCode, " url=", url)
 
+	if res.StatusCode >= 400 {
+		fmt.Printf("client: received unhealthy status code: %s\n", err)
+		os.Exit(1)
+	}
+
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Printf("client: could not read response body: %s\n", err)
