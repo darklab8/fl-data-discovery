@@ -34,8 +34,8 @@ func Request(url string) RequestResp {
 		os.Exit(1)
 	}
 
-	fmt.Printf("client: got response!\n")
-	fmt.Printf("client: status code: %d\n", res.StatusCode)
+	fmt.Println("client: got response!")
+	fmt.Println("client: status code: ", res.StatusCode, " url=", url)
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
