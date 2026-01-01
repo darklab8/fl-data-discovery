@@ -14,6 +14,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 type RequestResp struct {
@@ -39,6 +41,14 @@ func Request(url string) RequestResp {
 
 	if res.StatusCode >= 400 {
 		fmt.Printf("client: received unhealthy status code: %s\n", err)
+
+		defer res.Body.Close()
+		bodyBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bodyString := string(bodyBytes)
+		fmt.Println("body=", bodyString)
 		os.Exit(1)
 	}
 
