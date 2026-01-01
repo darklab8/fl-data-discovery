@@ -28,6 +28,8 @@ func Request(url string) RequestResp {
 		os.Exit(1)
 	}
 
+	req.Header.Set("User-Agent", "darkwind/1.0")
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Printf("client: error making http request: %s\n", err)
