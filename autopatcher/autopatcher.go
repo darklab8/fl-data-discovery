@@ -21,6 +21,8 @@ type RequestResp struct {
 	StatusCode int
 }
 
+var UserAgent = "darkwind/1.0"
+
 func Request(url string) RequestResp {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -28,7 +30,7 @@ func Request(url string) RequestResp {
 		os.Exit(1)
 	}
 
-	req.Header.Set("User-Agent", "darkwind/1.0")
+	req.Header.Set("User-Agent", UserAgent)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -68,7 +70,15 @@ func Request(url string) RequestResp {
 func downloadFile(filepath string, url string) (err error) {
 
 	// Get the data
-	resp, err := http.Get(url)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		fmt.Printf("client: could not create request: %s\n", err)
+		os.Exit(1)
+	}
+	req.Header.Set("User-Agent", UserAgent)
+
+	resp, err := http.DefaultClient.Do(req)
+
 	if err != nil {
 		return err
 	}
