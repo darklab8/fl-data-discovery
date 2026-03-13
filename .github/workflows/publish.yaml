@@ -5,7 +5,12 @@ name: Publish
     - master
   schedule:
   - cron: '0 10,15,20 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      repository:
+        description: 'Who called'
+        required: false
+        type: string
   repository_dispatch:
     types:
     - publish
