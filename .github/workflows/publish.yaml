@@ -54,8 +54,7 @@ jobs:
         site-root: /fl-data-discovery/
         freelancer-folder: ${{ github.workspace }}/freelancer_folder
         heading: <a href="https://github.com/darklab8/fl-darkstat">Darkstat</a> from <a href="https://darklab8.github.io/blog/pet_projects.html#Freelancercommunity">DarkTools</a> for <a href="https://github.com/darklab8/fl-data-discovery">Disco</a>
-        relay-host: https://darkrelay.dd84ai.com
-        apigateway-host: https://apigateway.dd84ai.com
+        relay-host: https://darkstat.dd84ai.com
         command: map build
         map-index-url: map.html
     - run: cp build_defaults/* build/
