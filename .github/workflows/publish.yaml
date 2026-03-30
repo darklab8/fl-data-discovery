@@ -58,6 +58,7 @@ jobs:
         apigateway-host: https://apigateway.dd84ai.com
         command: map build
         map-index-url: map.html
+    - run: cp build_defaults/* build/
     - name: Upload artifacts for deployment to Github Pages
       uses: actions/upload-pages-artifact@v3
       with:
@@ -67,4 +68,3 @@ jobs:
       uses: actions/deploy-pages@v4
       id: deployment
 
-      
