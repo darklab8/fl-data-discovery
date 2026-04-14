@@ -67,7 +67,7 @@ func Request(url string) RequestResp {
 	}
 }
 
-func downloadFile(filepath string, url string) (err error) {
+func DownloadFile(filepath string, url string) (err error) {
 
 	// Get the data
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -210,7 +210,7 @@ func (patch Patch) GetFolderPath() string {
 	return filepath.Join("patches", strings.ReplaceAll(patch.Filename, ".zip", ""))
 }
 
-func parseForPatches(discovery_url string, body []byte) []Patch {
+func ParseForPatches(discovery_url string, body []byte) []Patch {
 	var patches []Patch
 	var Page PatcherData
 	xml.Unmarshal(body, &Page)
@@ -234,7 +234,7 @@ func downloadPatch(patch Patch) {
 		return
 	}
 
-	err := downloadFile(patch.GetFilepath(), patch.Url)
+	err := DownloadFile(patch.GetFilepath(), patch.Url)
 	if err != nil {
 		fmt.Println("not able to download url", err, patch, "url=", patch.Url)
 		os.Exit(1)
@@ -322,7 +322,7 @@ type BadassRoot struct {
 
 type PatchHash string
 
-func readLauncherConfig() (map[PatchHash]string, []string) {
+func ReadLauncherConfig() (map[PatchHash]string, []string) {
 	body, err := os.ReadFile("launcherconfig.xml")
 	if err != nil {
 		panic(fmt.Sprintln("failed to read launcherconfig", err))
@@ -384,10 +384,9 @@ func RunAutopatcher() {
 	discovery_url := "https://patch.discoverygc.com/"
 	discovery_path_url := discovery_url + "patchlist.xml"
 	resp := Request(discovery_path_url)
+	patches := ParseForPatches(discovery_url, resp.Body)
 
-	patches := parseForPatches(discovery_url, resp.Body)
-
-	patchhistory, file_lines := readLauncherConfig()
+	patchhistory, file_lines := ReadLauncherConfig()
 
 	var applied_patches []Patch
 
