@@ -57,6 +57,7 @@ jobs:
         relay-host: https://darkstat.dd84ai.com
         command: map build
         map-index-url: map.html
+        disable-dev-mode: "true"
     - run: cp build_defaults/* build/
     - name: Upload artifacts for deployment to Github Pages
       uses: actions/upload-pages-artifact@v3
