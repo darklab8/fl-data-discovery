@@ -390,14 +390,14 @@ func RunAutopatcher() {
 
 	var applied_patches []Patch
 
-	for _, patch := range patches {
-
-		if patch.Hash == "E6F377FC78A4833128EA685C29D47458" {
-			fmt.Println()
-		}
-
+	for index, patch := range patches {
 		if _, found := patchhistory[patch.Hash]; found {
 			fmt.Println("patch is already installed", patch)
+
+			if index == len(patches)-1 {
+				patch_marshaled, _ := json.Marshal(patch)
+				os.WriteFile(AutopatherFilename, patch_marshaled, 0666)
+			}
 			continue
 		}
 
