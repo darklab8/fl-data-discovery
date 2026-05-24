@@ -296,23 +296,31 @@ type BadassRoot struct {
 
 type PatchHash string
 
-func ReadLauncherConfig() (map[PatchHash]string, []string) {
+type LauncherConfigData struct {
+	PatchMap map[PatchHash]string
+	Patches  []PatchHash
+}
+
+func ReadLauncherConfig() (LauncherConfigData, []string) {
+	result := LauncherConfigData{
+		PatchMap: make(map[PatchHash]string),
+	}
 	body, err := os.ReadFile("launcherconfig.xml")
 	if err != nil {
 		panic(fmt.Sprintln("failed to read launcherconfig", err))
 	}
 
-	var patches map[PatchHash]string = make(map[PatchHash]string)
 	var Page BadassRoot
 	xml.Unmarshal(body, &Page)
 
 	for _, patch := range Page.PatchHistory.Patch {
-		patches[PatchHash(patch)] = ""
+		result.PatchMap[PatchHash(patch)] = ""
+		result.Patches = append(result.Patches, PatchHash(patch))
 	}
 
 	str := string(body)
 	file_lines := strings.Split(str, "\n")
-	return patches, file_lines
+	return result, file_lines
 }
 
 /*
@@ -371,7 +379,7 @@ func RunAutopatcher(workdir string) error {
 	var applied_patches []Patch
 
 	for index, patch := range patches {
-		if _, found := patchhistory[patch.Hash]; found {
+		if _, found := patchhistory.PatchMap[patch.Hash]; found {
 			fmt.Println("patch is already installed", patch)
 
 			if index == len(patches)-1 {
