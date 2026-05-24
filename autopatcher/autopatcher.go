@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -14,6 +15,9 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/darklab8/go-utils/typelog"
+	"github.com/darklab8/go-utils/utils/utils_http"
 )
 
 type RequestResp struct {
@@ -21,64 +25,34 @@ type RequestResp struct {
 	StatusCode int
 }
 
-var UserAgent = "darkwind/1.0"
+var Log *typelog.Logger = typelog.NewLogger("autopatcher", typelog.WithLogLevel(typelog.LEVEL_INFO))
 
-func Request(url string) RequestResp {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		fmt.Printf("client: could not create request: %s\n", err)
-		os.Exit(1)
-	}
-
-	req.Header.Set("User-Agent", UserAgent)
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Printf("client: error making http request: %s\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println("client: got response!")
-	fmt.Println("client: status code: ", res.StatusCode, " url=", url)
+func Request(url string) (RequestResp, error) {
+	res, err := utils_http.Get(url)
 
 	if res.StatusCode >= 400 {
-		fmt.Printf("client: received unhealthy status code: %s\n", err)
-
-		defer res.Body.Close()
-		bodyBytes, err := io.ReadAll(res.Body)
-		if err != nil {
-			fmt.Println("err=", err.Error())
-			os.Exit(1)
-		}
-		bodyString := string(bodyBytes)
-		fmt.Println("body=", bodyString)
-		os.Exit(1)
+		return RequestResp{}, errors.New(fmt.Sprintln("status code is bad, status=", res.StatusCode, err))
 	}
+
+	if Log.CheckError(err, "client: error making http request to url", typelog.Any("url", url)) {
+		return RequestResp{}, err
+	}
+
+	Log.Info("client: got response!", typelog.Any("status_code", res.StatusCode), typelog.Any("url", url))
 
 	resBody, err := io.ReadAll(res.Body)
-	if err != nil {
-		fmt.Printf("client: could not read response body: %s\n", err)
-		os.Exit(1)
+
+	if Log.CheckError(err, "client: could not read response body", typelog.Any("url", url)) {
+		return RequestResp{}, err
 	}
-	// fmt.Printf("client: response body: %s\n", resBody)
 	return RequestResp{
 		Body:       resBody,
 		StatusCode: res.StatusCode,
-	}
+	}, nil
 }
 
 func DownloadFile(filepath string, url string) (err error) {
-
-	// Get the data
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		fmt.Printf("client: could not create request: %s\n", err)
-		os.Exit(1)
-	}
-	req.Header.Set("User-Agent", UserAgent)
-
-	resp, err := http.DefaultClient.Do(req)
-
+	resp, err := utils_http.Get(url)
 	if err != nil {
 		return err
 	}
@@ -86,7 +60,7 @@ func DownloadFile(filepath string, url string) (err error) {
 
 	// Check server response
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad status: %s", resp.Status)
+		return fmt.Errorf("downloading file bad status: %s", resp.Status)
 	}
 
 	// Create the file
@@ -227,19 +201,19 @@ func ParseForPatches(discovery_url string, body []byte) []Patch {
 	return patches
 }
 
-func downloadPatch(patch Patch) {
+func downloadPatch(patch Patch) error {
 	os.MkdirAll("patches", 0777)
 	if fileExists(patch.GetFilepath()) {
-		fmt.Println("fpath already eixsts, fpath=", patch.GetFilepath())
-		return
+		return errors.New(fmt.Sprintln("fpath already eixsts, fpath=", patch.GetFilepath()))
 	}
 
 	err := DownloadFile(patch.GetFilepath(), patch.Url)
 	if err != nil {
-		fmt.Println("not able to download url", err, patch, "url=", patch.Url)
-		os.Exit(1)
+		err_msg := fmt.Sprintln("not able to download url", err, patch, "url=", patch.Url)
+		return errors.New(err_msg)
 	}
 	fmt.Println("downloaded file", patch.GetFilepath())
+	return nil
 }
 
 type File struct {
@@ -380,10 +354,16 @@ func init() {
 	}
 }
 
-func RunAutopatcher() {
+func RunAutopatcher(workdir string) error {
+	os.Chdir(workdir)
+	println(os.Getwd())
+
 	discovery_url := "https://patch.discoverygc.com/"
 	discovery_path_url := discovery_url + "patchlist.xml"
-	resp := Request(discovery_path_url)
+	resp, err := Request(discovery_path_url)
+	if err != nil {
+		return err
+	}
 	patches := ParseForPatches(discovery_url, resp.Body)
 
 	patchhistory, file_lines := ReadLauncherConfig()
@@ -401,7 +381,10 @@ func RunAutopatcher() {
 			continue
 		}
 
-		downloadPatch(patch)
+		err := downloadPatch(patch)
+		if Log.CheckError(err, "failed to download patch") {
+			return err
+		}
 
 		patch_body, _ := os.ReadFile(patch.GetFilepath())
 		hash := md5.Sum(patch_body)
@@ -409,7 +392,7 @@ func RunAutopatcher() {
 		fmt.Println("md5_result=", md5_result)
 
 		if md5_result != strings.ToLower(string(patch.Hash)) {
-			panic(fmt.Sprintln("md5 hash sum is not matching", "expected=", patch.Hash, " but bound=", md5_result))
+			return errors.New(fmt.Sprintln("md5 hash sum is not matching", "expected=", patch.Hash, " but bound=", md5_result))
 		}
 
 		// md5, err := checksum.MD5sum(patch.GetFilepath())
@@ -424,8 +407,8 @@ func RunAutopatcher() {
 		for _, file := range patch_folder.Files {
 
 			content, err := os.ReadFile(file.GetPath())
-			if err != nil {
-				panic(fmt.Sprintln("failed to read file", err))
+			if Log.CheckError(err, fmt.Sprintln("failed to read file", err)) {
+				return err
 			}
 
 			relative_patch_filepath := file.GetRelPathTo(patch.GetFolderPath())
@@ -462,7 +445,8 @@ func RunAutopatcher() {
 		}
 	}
 	if len(patch_file_start) == 0 {
-		panic("not found patch line index, where to insert")
+		err_msg := "not found patch line index, where to insert"
+		return errors.New(err_msg)
 	}
 	var new_patch_file_lines []string
 	new_patch_file_lines = append(new_patch_file_lines, patch_file_start...)
@@ -471,6 +455,7 @@ func RunAutopatcher() {
 	}
 	new_patch_file_lines = append(new_patch_file_lines, patch_file_end...)
 	os.WriteFile("launcherconfig.xml", []byte(strings.Join(new_patch_file_lines, "\n")), 0666)
+	return nil
 }
 
 const AutopatherFilename = "autopatcher.latest_patch.json"

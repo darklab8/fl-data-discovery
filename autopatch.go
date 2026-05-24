@@ -10,8 +10,9 @@ import (
 func main() {
 	f := flag.String("wd", ".", "...")
 	flag.Parse()
-	os.Chdir(*f)
-	println(os.Getwd())
 
-	autopatcher.RunAutopatcher()
+	err := autopatcher.RunAutopatcher(*f)
+	if err != nil {
+		os.Exit(1)
+	}
 }
