@@ -42,7 +42,7 @@ jobs:
       with:
         freelancer-mod: discovery
         freelancer-folder: ${{ github.workspace }}/freelancer_folder
-        ssh-key-base64-discovery: ${{ secrets.ID_RSA_FILES_FREELANCER_DISCOVERY }}
+
     - name: Install Go
       uses: darklab8/infra/.github/actions/install-go@master
     - name: Patch freelancer discovery to latest
