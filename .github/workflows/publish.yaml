@@ -38,7 +38,7 @@ jobs:
       id: cache-freelancer
     - name: Checkout Freelancer
       if: ${{ steps.cache-freelancer.outputs.cache-hit != 'true' }}
-      uses: darklab8/infra/.github/actions/checkout-freelancer@master
+      uses: darklab8/fl-darkstat/.github/actions/checkout-freelancer@master
       with:
         freelancer-mod: discovery
         freelancer-folder: ${{ github.workspace }}/freelancer_folder
