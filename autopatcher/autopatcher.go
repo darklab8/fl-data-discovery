@@ -190,7 +190,6 @@ func ParseForPatches(discovery_url string, body []byte) []Patch {
 	xml.Unmarshal(body, &Page)
 
 	for _, patch := range Page.PatchList.Patch {
-		// fmt.Println(patch)
 		patches = append(patches, Patch{
 			Filename: patch.URL,
 			Url:      discovery_url + patch.URL,
@@ -212,7 +211,7 @@ func downloadPatch(patch Patch) error {
 		err_msg := fmt.Sprintln("not able to download url", err, patch, "url=", patch.Url)
 		return errors.New(err_msg)
 	}
-	fmt.Println("downloaded file", patch.GetFilepath())
+	Log.Info(fmt.Sprintln("downloaded file", patch.GetFilepath()))
 	return nil
 }
 
@@ -380,7 +379,7 @@ func RunAutopatcher(workdir string) error {
 
 	for index, patch := range patches {
 		if _, found := patchhistory.PatchMap[patch.Hash]; found {
-			fmt.Println("patch is already installed", patch)
+			Log.Info(fmt.Sprintln("patch is already installed", patch))
 
 			if index == len(patches)-1 {
 				patch_marshaled, _ := json.Marshal(patch)
@@ -397,15 +396,11 @@ func RunAutopatcher(workdir string) error {
 		patch_body, _ := os.ReadFile(patch.GetFilepath())
 		hash := md5.Sum(patch_body)
 		md5_result := hex.EncodeToString(hash[:])
-		fmt.Println("md5_result=", md5_result)
+		Log.Info(fmt.Sprintln("md5_result=", md5_result))
 
 		if md5_result != strings.ToLower(string(patch.Hash)) {
 			return errors.New(fmt.Sprintln("md5 hash sum is not matching", "expected=", patch.Hash, " but bound=", md5_result))
 		}
-
-		// md5, err := checksum.MD5sum(patch.GetFilepath())
-		// fmt.Println(md5)
-		// fmt.Println("md5_result=", md5, err)
 
 		Unzip(patch.GetFilepath(), patch.GetFolderPath())
 
@@ -437,7 +432,7 @@ func RunAutopatcher(workdir string) error {
 
 		os.RemoveAll(patch.GetFolderPath())
 
-		fmt.Println("applied patch", patch)
+		Log.Info("applied patch", typelog.Any("patch", patch))
 		patch_marshaled, _ := json.Marshal(patch)
 		os.WriteFile(AutopatherFilename, patch_marshaled, 0666)
 
