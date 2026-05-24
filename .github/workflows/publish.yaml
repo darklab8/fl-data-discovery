@@ -45,8 +45,10 @@ jobs:
         ssh-key-base64-discovery: ${{ secrets.ID_RSA_FILES_FREELANCER_DISCOVERY }}
     - name: Install Go
       uses: darklab8/infra/.github/actions/install-go@master
-    - name: Patch to latest
-      run: go run autopatch.go -wd ${{ github.workspace }}/freelancer_folder
+    - name: Patch freelancer discovery to latest
+      uses: darklab8/fl-darkstat/.github/actions/patch-disco@master
+      with:
+        freelancer-folder: ${{ github.workspace }}/freelancer_folder
     - name: Darkstat Build
       uses: darklab8/fl-darkstat/.github/actions/build@master
       with:
